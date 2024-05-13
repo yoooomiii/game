@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>캔버스: 이미지 출력하기</title>
+    </head>
+<style>
+    #myCanvas{
+        background-color: aqua;
+        /*border: 1px solid black;*/
+    }
+</style>
+<body>
+<!-- <h3>캔버스: 이미지 출력하기</h3>
+<hr> -->
+<canvas id="myCanvas" width="500" height="500">
+</canvas>
+
+<script>
+    // Get the canvas and its 2D context
+    const canvas = document.getElementById('myCanvas');
+    const context = canvas.getContext('2d');
+
+    // Set the initial position of the image
+    let x = 0;
+    let y = 0;
+    const moveSpeed = 10;
+
+    // Load the image
+    const cImage = new Image();
+    const bImage = new Image();
+    cImage.src = './img/rball.png'; // 이미지 경로 수정하세요!!
+    bImage.src = './img/testfd.png'; // Replace 'path_to_your_image.png' with the actual path to your image
+
+    // Function to draw the image on the canvas
+    function drawImage() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(bImage,0,0,500,500);
+        context.drawImage(cImage, x, y, cImage.width=60, cImage.height=60);
+
+    }
+
+    // Function to handle keyboard events
+    function handleKeyDown(event) {
+        console.log(x+","+y);
+        // Arrow keys (left, right, up, down) have key codes 37, 39, 38, 40
+        switch (event.keyCode) {
+            case 37: // Left arrow
+                x -= moveSpeed;
+                break;
+            case 39: // Right arrow
+                x += moveSpeed;
+                break;
+            case 38: // Up arrow
+                y -= moveSpeed;
+                break;
+            case 40: // Down arrow
+                y += moveSpeed;
+                break;
+        }
+    }
+
+    // Event listener for keydown events
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Function to update the canvas
+    function updateCanvas() {
+        drawImage();
+        requestAnimationFrame(updateCanvas);
+    }
+
+    // Wait for the image to load before starting the animation
+    cImage.onload = function() {
+        updateCanvas();
+    };
+</script>
+
+</body>
+</html>

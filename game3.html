@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="kor">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>미~~~로</title>
+</head>
+<style>
+    #canvas {
+        border: 4px solid;
+        margin-left: 250px;
+        margin-top: 50px;
+
+    }
+</style>
+
+<body>
+    <div id="main">
+        <canvas id="canvas" width="600" height="600"> <!--캔버스 생성-->
+        </canvas>
+    </div>
+
+    <div>
+        <span>ss</span>
+    </div>
+
+
+</body>
+
+</html>
+<script>
+    let canvas = document.getElementById("canvas");
+    let ctx = canvas.getContext("2d");
+
+
+
+
+
+    // canvas 가로 및 세로의 반값 > 250
+    let x = canvas.width / 2;       //캔버스의 너비를 2로 나누어 가로의 중심점 구하기  ex)너비가 500이라면 중심은 250
+    let y = canvas.height / 2;      //캔버스의 높이를 2로 나누어 가로의 중심점 구하기  ex)높이가 500이라면 중심은 250
+
+    // 움직일 도형의 크기
+    let rectWidth = 25;
+    let rectHeight = 25;
+
+
+
+    // 움직일 도형의 시작점 정의
+    let rectX = (599 - rectWidth);  //rectX=도형의 x좌표  캔버스의 너비에서 도형의 너비를 빼고
+    // 그 결과를 2로 나누어서, 캔버스의 가로 중심에서 도형의 너비의 반만큼을 좌표로 설정 
+    //이렇게 하면 도형이 캔버스의 중심에 수평으로 위치하게 됩니다.
+    let rectY = (599 - rectHeight);  // 캔버스의 높이에서 도형의 높이를 빼고 그 결과를 2로 나누어서,
+    // 캔버스의 세로 중심에서 도형의 높이의 반만큼을 좌표로 설정 이렇게 하면 도형이 캔버스의 중심에 수직으로 위치
+
+    //trye로 되면 해당방향으로 이동
+    let rightPressed = false;    //오른쪽 방향키가 눌려져 있는지 판단
+    let leftPressed = false;    //왼쪽 방향키가 눌려져 있는지 판단
+    let upPressed = false;      //위쪽 방향키가 눌려져 있는지 판단
+    let downPressed = false;    //아래 방향키가 눌려져 있는지 판단
+
+    //먼저 눌린 키를 수신할 이벤트 리스너 필요
+    document.addEventListener("keydown", keyDownHandler, false); //keydown은 키보드라 눌렸을때, keyDownHandle은 
+    //키보다가 눌렸을때 호출되는 메서드 이름, false는 이벤트 핸들러를 버블링(bubbling) 방식으로 처리할지 캡처링(capturing)
+    // 방식으로 처리할지를 지정하는 것입니다. 이 매개변수는 선택적이며 기본값은 보통 false.
+    document.addEventListener("keyup", keyUpHandler, false);
+
+
+
+
+    //키보드를 눌 렀 을 때 함수 발생
+    function keyDownHandler(e) {     //누를때     //e는 event의 객체
+        if (e.key == 37 || e.key == "ArrowLeft") {    //37은 왼쪽, ArrowLeft는 키보드 표준 이벤트, 왼쪽 방향키를 의미함
+            //오른쪽이랑 왼쪽이랑 반대로 되어있길래 변경함 , 왼쪽 방향키를 눌렀을경우 leftPressed를 true로 설정
+            leftPressed = true;
+        } else if (e.key == 39 || e.key == "ArrowRight") {
+            rightPressed = true;
+        } else if (e.key == 38 || e.key == "ArrowUp") {
+            upPressed = true;
+        } else if (e.key == 40 || e.key == "ArrowDown") {
+            downPressed = true;
+        }
+    }
+
+    //키보드를 안 눌 렀 을 때 함수 발생
+    function keyUpHandler(e) {       //안누를때
+        if (e.key == 37 || e.key == "ArrowLeft") {    //왼쪽 키보드를 누르지 않았을경우 leftPressed를 false로 설정
+            leftPressed = false;
+        } else if (e.key == 39 || e.key == "ArrowRight") {
+            rightPressed = false;
+        } else if (e.key == 38 || e.key == "ArrowUp") {
+            upPressed = false;
+        } else if (e.key == 40 || e.key == "ArrowDown") {
+            downPressed = false;
+        }
+    }
+
+    // 움직일 도형을 그리는 함수
+    function drawRect() {    //사각형을 그리는 함수
+
+        ctx.beginPath();  //이전경로랑 이어지지 않도록 새로운 경로 시작, 새로운 도형을 그릴때마다 사용해서 새로운 경로로 시작해야 좋음
+
+
+        ctx.strokeStyle = "blue";  //선 색상 지정
+        // 채우기는 도형의 내부를 color나 gradient, img로 채움
+        // stroke는 외곽선에 색을 칠함
+
+        ctx.fillStyle = "blue";
+
+        ctx.rect(rectX, rectY, rectWidth, rectHeight);
+        //rect() 메서드는 사각형의 경로를 그립니다. 매개변수로는 시작점의 x 좌표와 y 좌표, 그리고 사각형의 너비와 높이를 받는다
+        //rectX는 움질일 도형의 x좌표, 이 변수를 이용하여 원하는 좌표로 이동
+        //--2번째의 Y좌표가 지정이 안 되어 있어서, 위아래 이동이 안됐었음 
+
+
+
+        ctx.stroke();  //stroke() 메서드를 호출하여 선을 그린다,  이때 rect() 메서드로 정의된 사각형의 윤곽선이 그려진다
+
+        ctx.closePath();   //beginPath()로 시작한 경로를 닫는다
+    }
+
+    class block {
+        constructor() {
+            this.x = 400;
+            this.y = 400;
+            this.width = 50;
+            this.height = 100;
+
+        }
+    }
+
+    // 먼저 전체 Canvas를 지움 > 모든 단일 프레임에 처음부터 모든 것을 그림 > 눌려진 키 변수 확인 
+    // 사각형을 그릴 때는 fillRect(), strokeRect(), clearRect()의 메서드 사용
+    // 모두 매개변수로 사각형의 x/y좌표, 너비/높이 4가지를 받음 (픽셀단위)
+    function draw() {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);  //사각형을 지우기 위해 clearRect() 메서드 호출
+        //이 메서드는 지정된 사각 영역을 투명한 검정색으로 지원준다
+        //지우는 이유는 1.이전 그림이 남아있을수 있음 2.애니메이션 효과: 이전 사각형 지우고 다시 사각형을 그리면서
+        //사각형이 움직이는 것처럼 보이게 한다. 3.렌더링 최적화: 캔버스에 내용이 많으면 성능이 안좋음 쓸데없는 것들 지워야함
+
+        drawRect();  //위에 정의한 움직일 도형을 그리는 함수인 drawRect() 메서드 호출
+    }
+
+    var block = new block();
+    block.draw();
+    // ctx.fillStyle = 'blue';              //장애물 설정
+    // ctx.fillRect(490, 400, 45, 200);    //수직
+
+    // ctx.fillStyle = 'gray';
+    // ctx.fillRect(400, 300, 200, 45);     //수평
+
+    // ctx.fillStyle = 'red';
+    // ctx.fillRect(355, 300, 45, 200); 
+
+    // ctx.fillStyle = 'yellow';
+    // ctx.fillRect(100, 500, 300, 45); 
+
+    // ctx.fillStyle = 'orange';
+    // ctx.fillRect(55, 345, 45, 200);
+
+    if (rightPressed && rectX < canvas.width - rectWidth) {
+        rectX += 1;
+    }
+    //rightPressed= 오른쪽 방향키가 눌려져 있고, rectX < canvas.width - rectWidth= 사각형이 캔버스 오른쪽 경계를
+    //넘어가지 않았을 경우, rectX 값을 증가시켜 오른쪽으로 4픽셀씩 이동
+    else if (leftPressed && rectX > 0) {
+        rectX -= 1;
+    }
+    //leftPressed= 왼쪽 방향키가 눌려져 있고, rectX>0= 사각형이 캔버스 왼쪽 경계를 넘어가지 않았을경우(오른쪽이랑 다른
+    //이유는 시작점의 위치는 항상 0,0 좌표로 왼쪽상단에서 시작하기 때문에) rectX 값을 감소시켜 왼쪽으로 이동
+    //rectX < canvas.width - rectWidth 가 아닌 이유는 왼쪽 상단 0,0으로 시작하므로 왼쪽으로는 더이상 갈 수 없음
+    //그래서 따로 지정할 필요x
+    else if (downPressed && rectY < canvas.height - rectHeight) {
+        rectY += 1;
+    }
+    //아래쪽 방향키가 눌려 있고, 사각형이 캔버스의 아래쪽 경계를 넘어가지 않을 때, 
+    //rectY 값을 증가시켜 아래쪽으로 이동(증가시키는 이유는 시작좌표가 0,0 왼쪽 상단 시작이라서)
+    else if (upPressed && rectY > 0) {
+        rectY -= 1;
+    }
+    //위쪽 방향키가 눌려있고, 사각형이 캔버스의 rectY가 0보다 클 경우, rectY를 감소시켜서 위쪽으로 4픽셀씩 이동
+
+    if (rectX <= 0 || rectX >= canvas.width - rectWidth || rectY <= 0 || rectY >= canvas.height - rectHeight) {      // 게임을 중단하고 메시지 표시
+        clearInterval(gameInterval); // 게임 루프를 중지
+        alert('죽었다!'); // 메시지 표시
+
+    }
+    if (rectX >= 465 && rectX <= 535 && rectY >= 375 && rectY <= 600) {
+        clearInterval(gameInterval); // 게임 루프를 중지
+        alert('죽었다!'); // 메시지 표시
+    }
+    if (rectX >= 375 && rectX <= 600 && rectY >= 300 && rectY <= 345) {
+        clearInterval(gameInterval); // 게임 루프를 중지
+        alert('죽었다!'); // 메시지 표시
+    }
+    if (rectX >= 330 && rectX <= 400 && rectY >= 300 && rectY <= 500) {
+        clearInterval(gameInterval); // 게임 루프를 중지
+        alert('죽었다!'); // 메시지 표시
+    }
+    if (rectX >= 100 && rectX <= 400 && rectY >= 475 && rectY <= 545) {
+        clearInterval(gameInterval); // 게임 루프를 중지
+        alert('죽었다!'); // 메시지 표시
+    }
+    if (rectX >= 55 && rectX <= 100 && rectY >= 300 && rectY <= 500) {
+        clearInterval(gameInterval); // 게임 루프를 중지
+        alert('죽었다!'); // 메시지 표시
+    }
+    }
+
+
+
+    // 게임 루프
+    let gameInterval = setInterval(draw, 10);
+
+    // setInterval > 캔버스 내의 움직이는 오브젝트가 있을 때 사용하는 내장함수
+    //setInterval(draw, 10);
+    //일정한 간격으로 함수를 반복적으로 호출하는 JavaScript의 내장 함수(draw함수를 반복)
+    //주어진 함수를 주어진 시간마다 실행하여 반복적인 애니메이션 효과나 주기적인 작업을 수행하는 데 사용됨
+    //뒤에 숫자가 작을수록 함수가 더 많이 호출되고 캔버스 내용이 더 많이 업데이트가 되므로 움직임이 빠르고 부드럽게 이동 
+
+</script>
+
+
+
+<!--셀 로직(벽을 만드는것)을 구현
+
+1.미로 맵 생성: 미로를 격자 형태로 생성합니다. 이때 각 셀은 벽인지 아니면 빈 공간인지를 나타내는 값으로 초기화됩니다.
+
+2.사각형 위치 감지: 사각형의 현재 위치를 셀 좌표로 변환하여 어떤 셀 위에 있는지를 확인합니다.
+
+3.벽 충돌 감지: 사각형이 이동하려는 방향에 벽이 있는지를 확인합니다. 벽이 있는 경우 이동을 막거나 다른 동작을 수행합니다.
+
+4.이동 제어: 벽 충돌이 없는 경우에만 사각형을 움직입니다. 움직임이 가능한 경우에는 적절한 방향으로 사각형의 위치를 업데이트합니다.
+
+5.종료 조건 확인: 사각형이 목표 지점에 도달하거나 벽과 충돌하는 등 게임 종료 조건을 확인하고, 종료 조건이 충족되면 게임을 종료합니다.
+
+6.게임 루프: 이러한 과정을 반복하여 게임이 지속되는 동안 지속적으로 상태를 업데이트하고 사용자 입력을 처리합니다.-->
+
+
+<!--재귀적 분할 알고리즘을 사용한 미로 생성 단계:
+
+1.시작: 전체 그리드를 닫힌 상태로 초기화합니다.
+
+2.분할: 그리드 내부에서 벽을 추가하여 분할합니다. 이 단계에서 임의의 위치에서 수직 또는 수평 방향으로 벽을 추가합니다.
+
+3.재귀적 호출: 각 분할 영역에 대해 재귀적으로 위의 과정을 반복합니다. 분할된 영역이 충분히 작아질 때까지 이 과정을 반복합니다.
+
+4.종료 조건: 분할된 영역이 일정 크기 미만이 되면 분할을 중단합니다.
+
+5.무작위 선택: 분할된 영역 중 임의의 위치에서 벽을 제거하여 연결성을 보장합니다. 이를 통해 미로를 생성합니다.-->
+
+<!--미로 맵을 캔버스에 그리는 일반적인 접근 방식
+
+1.캔버스 설정: HTML 캔버스 요소를 생성하고 크기를 설정합니다.
+
+2.미로 맵 그리기: JavaScript를 사용하여 캔버스에 미로 맵을 그립니다. 미로의 각 셀은 캔버스의 픽셀로 매핑됩니다.
+
+3.미로 그래픽 디자인: 미로를 그리는 동안 벽과 공간을 적절히 디자인하여 시각적으로 구별될 수 있도록 합니다.
+
+4.게임 로직 통합: 미로를 생성하고 플레이어와 충돌 감지를 통해 게임 로직과 통합합니다.-->
+
+<!--예시코드/튜토리얼 (구글에 검색)
+"JavaScript maze generation algorithm"
+"HTML canvas maze tutorial"
+"Maze generation code example"
+"How to generate maze using JavaScript"
+"Recursive backtracking maze algorithm tutorial"
+
+게임을 마우스를 움직여서 하는게 좋을지 키보드로 하는게 더 좋을지..고민중....
+-->

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="kor">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공룡 게임</title>
+    <style>
+        canvas {
+            border: 1px solid #000;
+            display: block;
+            margin: 0 auto;
+            background-image: url('./img/배경.jpg');
+
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <script>
+        // 캔버스와 그리기 컨텍스트 가져오기
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const back = new Image();
+        back.src = "./img/배경.jpg";
+        back.onload = function () {
+            draw.drawImage(back, 50, 50, 250, 300);
+
+        }
+
+        //공룡 초기 위치 설정
+        let dinoX = 50;
+        let dinoY = canvas.height - 50;
+        let dinoWidth = 50;
+        let dinoHeight = 50;
+        let gravity = 0.4; // 중력 설정
+        let jumpPower = 60; // 점프 강도 조절 (낮을수록 부드럽게 올라감)
+        let isJumping = false;
+        let jumpCount = 0;
+
+        // 장애물 초기 위치 설정
+        let obstacleX = canvas.width;
+        let obstacleWidth = 20; // 너비를 랜덤하게 설정 (최소값: 20, 최대값: 50)
+        let obstacleHeight = 20; // 높이를 랜덤하게 설정 (최소값: 20, 최대값: 100)
+        let obstacleSpeed = 7;
+
+        // 게임 시작 시간
+        let startTime = null;
+        // 게임 오버 시간
+        let gameOverTime = null;
+
+        let spacePressed = false;
+        // 스페이스 바 눌린 시간을 저장할 변수
+        let spacePressedTime = null;
+
+        // 키보드 입력 처리
+        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keyup', handleKeyUp);
+
+        function handleKeyDown(event) {
+            if (event.key === ' ' && !isJumping) {
+                isJumping = true;
+                jumpCount = 0;
+                jump();
+            }
+        }
+
+        function handleKeyUp(event) {
+            if (event.key === ' ') {
+                isJumping = false;
+            }
+        }
+
+        // 점프 함수
+        function jump() {
+            if (jumpCount < 30) { // 최대 두 번 점프 가능
+                jumpCount++;
+                dinoY -= jumpPower;
+                if (dinoY <= canvas.height * dinoHeight) { // 최고점에 도달하면
+                    fall(); // 낙하 함수 호출
+                    return;
+                }
+                requestAnimationFrame(jump);
+            } else {
+                fall(); // 최대 점프 횟수 초과 시 낙하 함수 호출
+            }
+        }
+
+        // 낙하 함수
+        function fall() {
+            if (dinoY < canvas.height - dinoHeight) { // 바닥에 닿지 않은 경우
+                dinoY += gravity; // 중력에 따라 아래로 이동
+                requestAnimationFrame(fall);
+            } else { // 바닥에 닿은 경우
+                dinoY = canvas.height - dinoHeight; // 바닥에 고정
+                isJumping = false; // 점프 중이 아니라고 표시
+                jumpCount = 0; // 점프 횟수 초기화
+            }
+        }
+
+        function getRandomNumber(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function gameLoop(timestamp) {
+            // 게임 시작 시간 초기화
+            if (!startTime) {
+                startTime = timestamp;
+            }
+
+            // 게임 진행 시간 계산 (밀리초)
+            const elapsedTime = timestamp - startTime;
+            // 게임 진행 시간을 초 단위로 변환
+            const seconds = Math.floor(elapsedTime / 1000);
+
+            // 캔버스 초기화
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 캐릭터 그리기
+            ctx.fillStyle = 'green';
+            ctx.fillRect(dinoX, dinoY, dinoWidth, dinoHeight);
+
+            // 장애물 그리기
+            ctx.fillStyle = 'red';
+            ctx.fillRect(obstacleX, canvas.height - obstacleHeight, obstacleWidth, obstacleHeight);
+
+
+
+            // 타이머 표시
+            ctx.fillStyle = 'black';
+            ctx.font = '16px Arial';
+            ctx.fillText('Time: ' + seconds + 's', canvas.width - 100, 20);
+
+            // 게임 오버 시간 기록
+            if (gameOverTime === null && isColliding()) {
+                gameOverTime = seconds;
+                // 게임 오버 메시지와 재시작 여부를 묻는 창 표시
+                const restart = confirm('장애물에 부딪혔습니다! 게임 오버!\n게임을 다시 시작하시겠습니까?');
+                if (restart) {
+                    document.location.reload();
+                }
+            }
+
+            // 캐릭터 이동 및 점프 처리는 생략
+
+            // 장애물 이동
+            obstacleX -= obstacleSpeed;
+
+            // 장애물이 화면 왼쪽 끝에 도달하면 다시 오른쪽 끝으로 이동
+            if (obstacleX + obstacleWidth <= 0) {
+                obstacleX = canvas.width;
+
+                //이건 내가 짠거
+                let random = Math.random()* canvas.height
+                let random2 = Math.random()* canvas.width
+                let random3 = Math.random()* 20
+                obstacleWidth = random2; // 너비를 랜덤하게 설정 (최소값: 20, 최대값: 50)
+                obstacleHeight = random; // 높이를 랜덤하게 설정 (최소값: 20, 최대값: 100)
+               
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // 충돌 감지 함수
+        function isColliding() {
+            return (
+                dinoX + dinoWidth >= obstacleX &&
+                dinoX <= obstacleX + obstacleWidth &&
+                dinoY + dinoHeight >= canvas.height - obstacleHeight
+            );
+        }
+
+        // 게임 루프 시작
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+
+</html>
